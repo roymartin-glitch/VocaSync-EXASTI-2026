@@ -62,9 +62,20 @@ export default function EksperimenPage() {
             }
           } catch (_) {}
         }
-        setAiRecommendations(validRecs);
+
+        // DEDUP: 1 produk HANYA BOLEH memiliki maksimal 1 rekomendasi strategi
+        const seenProd = new Set<string>();
+        const uniqueRecs: any[] = [];
+        for (const r of validRecs) {
+          const norm = (r.productName || '').trim().toLowerCase();
+          if (norm && seenProd.has(norm)) continue;
+          if (norm) seenProd.add(norm);
+          uniqueRecs.push(r);
+        }
+
+        setAiRecommendations(uniqueRecs);
         try {
-          sessionStorage.setItem('vokasync_exp_rec_cache', JSON.stringify({ data: validRecs, ts: Date.now() }));
+          sessionStorage.setItem('vokasync_exp_rec_cache', JSON.stringify({ data: uniqueRecs, ts: Date.now() }));
         } catch (_) { }
       }
     } catch (err) {
@@ -190,7 +201,14 @@ export default function EksperimenPage() {
           const parsed = JSON.parse(recCache);
           const ageMs = Date.now() - (parsed.ts || 0);
           if (Array.isArray(parsed.data) && parsed.data.length > 0 && ageMs < 30 * 60 * 1000) {
-            setAiRecommendations(parsed.data);
+            const seen = new Set<string>();
+            const deduped = parsed.data.filter((r: any) => {
+              const norm = (r.productName || '').trim().toLowerCase();
+              if (norm && seen.has(norm)) return false;
+              if (norm) seen.add(norm);
+              return true;
+            });
+            setAiRecommendations(deduped);
           } else {
             fetchAiRecommendations();
           }
