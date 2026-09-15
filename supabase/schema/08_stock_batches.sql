@@ -27,6 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_stock_batches_user
 -- Row Level Security (RLS)
 ALTER TABLE public.stock_batches ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own stock batches" ON public.stock_batches;
 CREATE POLICY "Users can manage their own stock batches"
   ON public.stock_batches
   FOR ALL

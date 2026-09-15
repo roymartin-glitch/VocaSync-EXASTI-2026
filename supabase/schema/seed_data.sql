@@ -63,5 +63,12 @@ BEGIN
     INSERT INTO public.experiment_results (experiment_id, recorded_at, current_metric, evaluation_status, ai_verdict_text) VALUES
       (v_exp1, NOW() - INTERVAL '1 hour', '{"margin": 19.0, "daily_volume": 23}'::jsonb, 'in_progress', 'Hingga hari ke-3, volume penjualan stabil dan margin pulih mendekati target 20%.')
     ON CONFLICT DO NOTHING;
+
+    -- 6. Seed Stock Batches (FIFO Tracking)
+    INSERT INTO public.stock_batches (user_id, product_id, transaction_id, initial_quantity, remaining_quantity, cost_price, unit, status, created_at) VALUES
+      (v_user_id, v_prod_bawang_merah, v_tx1, 20, 15, 34000, 'kg', 'active', NOW() - INTERVAL '6 hours'),
+      (v_user_id, v_prod_bawang_putih, NULL, 25, 22, 28000, 'kg', 'active', NOW() - INTERVAL '1 day'),
+      (v_user_id, v_prod_cabai, NULL, 15, 3.5, 45000, 'kg', 'active', NOW() - INTERVAL '2 days')
+    ON CONFLICT DO NOTHING;
   END IF;
 END $$;

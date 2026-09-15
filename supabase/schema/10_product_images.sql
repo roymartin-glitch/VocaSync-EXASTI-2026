@@ -17,22 +17,26 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Storage RLS
-CREATE POLICY IF NOT EXISTS "Users can upload product images"
+DROP POLICY IF EXISTS "Users can upload product images" ON storage.objects;
+CREATE POLICY "Users can upload product images"
   ON storage.objects FOR INSERT
   TO authenticated
   WITH CHECK (bucket_id = 'product-images');
 
-CREATE POLICY IF NOT EXISTS "Anyone can view product images"
+DROP POLICY IF EXISTS "Anyone can view product images" ON storage.objects;
+CREATE POLICY "Anyone can view product images"
   ON storage.objects FOR SELECT
   TO public
   USING (bucket_id = 'product-images');
 
-CREATE POLICY IF NOT EXISTS "Users can update their product images"
+DROP POLICY IF EXISTS "Users can update their product images" ON storage.objects;
+CREATE POLICY "Users can update their product images"
   ON storage.objects FOR UPDATE
   TO authenticated
   USING (bucket_id = 'product-images');
 
-CREATE POLICY IF NOT EXISTS "Users can delete their product images"
+DROP POLICY IF EXISTS "Users can delete their product images" ON storage.objects;
+CREATE POLICY "Users can delete their product images"
   ON storage.objects FOR DELETE
   TO authenticated
   USING (bucket_id = 'product-images');
