@@ -8,10 +8,11 @@ export async function callGemini(
   }
 
   const modelsToTry = [
-    'gemini-3.5-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash-lite',
+    'gemini-3.7-flash',
     'gemini-flash-latest',
+    'gemini-3.5-flash-lite',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
   ];
 
   let lastError: any = null;

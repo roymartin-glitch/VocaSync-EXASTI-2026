@@ -83,6 +83,8 @@ export function AdvisorCard({ insight, onOpenStudio }: AdvisorCardProps) {
       utterance.lang = 'id-ID';
       utterance.rate = 0.92;
       utterance.pitch = 1.05;
+      const savedVol = typeof window !== 'undefined' ? localStorage.getItem('vokasync_sound_volume') : null;
+      utterance.volume = savedVol !== null ? Math.max(0, Math.min(1, Number(savedVol) / 100)) : 0.8;
 
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);

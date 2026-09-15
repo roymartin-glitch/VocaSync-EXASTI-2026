@@ -210,6 +210,8 @@ export default function CatatPage() {
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
       utterance.lang = 'id-ID';
       utterance.rate = 0.9;
+      const savedVol = typeof window !== 'undefined' ? localStorage.getItem('vokasync_sound_volume') : null;
+      utterance.volume = savedVol !== null ? Math.max(0, Math.min(1, Number(savedVol) / 100)) : 0.8;
       window.speechSynthesis.speak(utterance);
     } catch (e) {
       console.warn('Speech synthesis confirmation info:', e);
@@ -510,11 +512,11 @@ export default function CatatPage() {
     }
   };
 
-  // Timer santai dengan pemrosesan cepat (1 detik hening langsung proses)
+  // Timer santai dengan jeda bicara 2 detik agar pedagang leluasa berbicara tanpa terpotong
   const startGentleSilenceTimer = (text: string) => {
     if (isProcessingVoiceRef.current) return;
     clearSilenceTimers();
-    let secondsLeft = 1;
+    let secondsLeft = 2;
     setSilenceCountdown(secondsLeft);
 
     countdownIntervalRef.current = setInterval(() => {

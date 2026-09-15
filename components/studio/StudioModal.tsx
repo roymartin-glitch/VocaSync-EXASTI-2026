@@ -14,6 +14,7 @@ import {
   Loader2,
   Package,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 import { ProductAnalysisItem } from '@/types';
 
@@ -83,6 +84,8 @@ export function StudioModal({
     `Pesan sekarang via WhatsApp sebelum kehabisan.`
   );
 
+  const [copyProvider, setCopyProvider] = useState<string>('gemini');
+
   // Sync state when props change
   useEffect(() => {
     if (initialProductName) setActiveProductName(initialProductName);
@@ -90,6 +93,13 @@ export function StudioModal({
     if (initialUnit) setActiveUnit(initialUnit);
     if (initialImage !== undefined) setUploadedImage(initialImage || null);
   }, [initialProductName, initialPrice, initialUnit, initialImage]);
+
+  // Otomatis buatkan copywriting promosi segar dari Gemini AI saat modal studio dibuka atau komoditas berganti
+  useEffect(() => {
+    if (isOpen && activeProductName) {
+      fetchAiCopy(activeProductName, activePrice, activeUnit, copyStyle);
+    }
+  }, [isOpen, activeProductName]);
 
   // Handler for picking product inside StudioModal
   const handlePickProduct = (prod: ProductAnalysisItem) => {
@@ -124,6 +134,7 @@ export function StudioModal({
       const data = await res.json();
       if (data.success && data.text) {
         setPromoText(data.text);
+        if (data.provider) setCopyProvider(data.provider);
       }
     } catch (e) {
       console.warn('Fallback copywriting on network error:', e);
@@ -975,10 +986,16 @@ export function StudioModal({
           {/* Copywriting Section */}
           <div className="space-y-4">
             <div className="flex flex-col gap-3">
-              <label className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-emerald-700" />
-                <span>Pesan Promosi Siap Kirim WhatsApp</span>
-              </label>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <label className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-emerald-700" />
+                  <span>Pesan Promosi Siap Kirim WhatsApp</span>
+                </label>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-violet-100 text-violet-900 border border-violet-300/80 shadow-2xs">
+                  <Sparkles className="w-3.5 h-3.5 text-violet-700 animate-pulse" />
+                  <span>{copyProvider === 'gemini' ? 'Disusun oleh Google Gemini AI' : 'VokaSync AI Copywriter'}</span>
+                </span>
+              </div>
 
               {/* Tone style toggles & Regenerate */}
               <div className="flex items-center gap-2 flex-wrap">

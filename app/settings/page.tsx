@@ -92,11 +92,20 @@ export default function SettingsPage() {
     const cachedOwner = localStorage.getItem('vokasync_owner_name');
     if (cachedOwner) setOwnerName(cachedOwner);
 
+    const cachedBusinessType = localStorage.getItem('vokasync_business_type');
+    if (cachedBusinessType) setBusinessType(cachedBusinessType);
+
     const cachedSound = localStorage.getItem('vokasync_sound_alert');
     if (cachedSound !== null) setSoundAlertEnabled(cachedSound === 'true');
-    // 1. Instant check local storage for instant sync
+
+    const cachedVolume = localStorage.getItem('vokasync_sound_volume');
+    if (cachedVolume !== null) setSoundAlertVolume(Number(cachedVolume));
+
     const cachedTheme = localStorage.getItem('vokasync_theme') as AppThemeSetting;
     if (cachedTheme) setTheme(cachedTheme);
+
+    const cachedTextSize = localStorage.getItem('vokasync_text_size') as TextSizeSetting;
+    if (cachedTextSize) setTextSize(cachedTextSize);
 
     const cachedMargin = localStorage.getItem('vokasync_margin_threshold');
     if (cachedMargin) setMarginThreshold(cachedMargin);
@@ -106,6 +115,12 @@ export default function SettingsPage() {
 
     const cachedSupplierCost = localStorage.getItem('vokasync_supplier_cost_threshold');
     if (cachedSupplierCost) setSupplierCostThreshold(cachedSupplierCost);
+
+    const cachedDefaultUnit = localStorage.getItem('vokasync_default_unit');
+    if (cachedDefaultUnit) setDefaultUnit(cachedDefaultUnit);
+
+    const cachedPeriod = localStorage.getItem('vokasync_analysis_period') as AnalysisPeriodSetting;
+    if (cachedPeriod) setAnalysisPeriod(cachedPeriod);
 
     fetch('/api/settings')
       .then((res) => res.json())
@@ -148,10 +163,23 @@ export default function SettingsPage() {
             setSoundAlertEnabled(isEnabled);
             localStorage.setItem('vokasync_sound_alert', isEnabled ? 'true' : 'false');
           }
-          if (p.sound_alert_volume !== undefined) setSoundAlertVolume(Number(p.sound_alert_volume));
-          if (p.text_size) setTextSize(p.text_size as TextSizeSetting);
-          if (p.theme) setTheme(p.theme as AppThemeSetting);
-          if (p.default_unit) setDefaultUnit(p.default_unit);
+          if (p.sound_alert_volume !== undefined) {
+            const vol = Number(p.sound_alert_volume);
+            setSoundAlertVolume(vol);
+            localStorage.setItem('vokasync_sound_volume', String(vol));
+          }
+          if (p.text_size) {
+            setTextSize(p.text_size as TextSizeSetting);
+            localStorage.setItem('vokasync_text_size', p.text_size);
+          }
+          if (p.theme) {
+            setTheme(p.theme as AppThemeSetting);
+            localStorage.setItem('vokasync_theme', p.theme);
+          }
+          if (p.default_unit) {
+            setDefaultUnit(p.default_unit);
+            localStorage.setItem('vokasync_default_unit', p.default_unit);
+          }
           if (p.analysis_period) {
             setAnalysisPeriod(p.analysis_period as AnalysisPeriodSetting);
             localStorage.setItem('vokasync_analysis_period', p.analysis_period);
@@ -212,8 +240,24 @@ export default function SettingsPage() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // Helper to immediately persist settings changes to Supabase in real-time
+  // Helper to immediately persist settings changes to localStorage and Supabase in real-time
   const saveSettingsPatch = async (partialUpdates: Record<string, any>) => {
+    // 1. Instant local persistence for zero delay and guaranteed retention
+    if (typeof window !== 'undefined') {
+      if (partialUpdates.business_name !== undefined) localStorage.setItem('vokasync_business_name', partialUpdates.business_name);
+      if (partialUpdates.owner_name !== undefined) localStorage.setItem('vokasync_owner_name', partialUpdates.owner_name);
+      if (partialUpdates.business_type !== undefined) localStorage.setItem('vokasync_business_type', partialUpdates.business_type);
+      if (partialUpdates.margin_alert_threshold !== undefined) localStorage.setItem('vokasync_margin_threshold', String(partialUpdates.margin_alert_threshold));
+      if (partialUpdates.low_stock_threshold !== undefined) localStorage.setItem('vokasync_low_stock_threshold', String(partialUpdates.low_stock_threshold));
+      if (partialUpdates.supplier_cost_increase_threshold !== undefined) localStorage.setItem('vokasync_supplier_cost_threshold', String(partialUpdates.supplier_cost_increase_threshold));
+      if (partialUpdates.sound_alert_enabled !== undefined) localStorage.setItem('vokasync_sound_alert', partialUpdates.sound_alert_enabled ? 'true' : 'false');
+      if (partialUpdates.sound_alert_volume !== undefined) localStorage.setItem('vokasync_sound_volume', String(partialUpdates.sound_alert_volume));
+      if (partialUpdates.text_size !== undefined) localStorage.setItem('vokasync_text_size', partialUpdates.text_size);
+      if (partialUpdates.theme !== undefined) localStorage.setItem('vokasync_theme', partialUpdates.theme);
+      if (partialUpdates.default_unit !== undefined) localStorage.setItem('vokasync_default_unit', partialUpdates.default_unit);
+      if (partialUpdates.analysis_period !== undefined) localStorage.setItem('vokasync_analysis_period', partialUpdates.analysis_period);
+    }
+
     try {
       await fetch('/api/settings', {
         method: 'PATCH',
@@ -245,18 +289,27 @@ export default function SettingsPage() {
         analysis_period: analysisPeriod,
       };
 
+      // Instant persistent storage on client
+      localStorage.setItem('vokasync_sound_alert', soundAlertEnabled ? 'true' : 'false');
+      localStorage.setItem('vokasync_sound_volume', String(soundAlertVolume));
+      localStorage.setItem('vokasync_business_name', businessName);
+      localStorage.setItem('vokasync_owner_name', ownerName);
+      localStorage.setItem('vokasync_business_type', businessType);
+      localStorage.setItem('vokasync_margin_threshold', marginThreshold);
+      localStorage.setItem('vokasync_low_stock_threshold', lowStockThreshold);
+      localStorage.setItem('vokasync_supplier_cost_threshold', supplierCostThreshold);
+      localStorage.setItem('vokasync_default_unit', defaultUnit);
+      localStorage.setItem('vokasync_text_size', textSize);
+      localStorage.setItem('vokasync_theme', theme);
+      localStorage.setItem('vokasync_analysis_period', analysisPeriod);
+
       const res = await fetch('/api/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (data.success) {
-        localStorage.setItem('vokasync_sound_alert', soundAlertEnabled ? 'true' : 'false');
-        localStorage.setItem('vokasync_business_name', businessName);
-        localStorage.setItem('vokasync_owner_name', ownerName);
-        localStorage.setItem('vokasync_analysis_period', analysisPeriod);
-
+      if (data.success || res.ok) {
         // Invalidate caches across app so all pages reflect new threshold and store profile immediately
         const userKey = typeof window !== 'undefined'
           ? (localStorage.getItem('vokasync_user_id') || (localStorage.getItem('vokasync_is_demo') === 'true' ? 'demo' : 'guest'))
@@ -268,7 +321,7 @@ export default function SettingsPage() {
         sessionStorage.removeItem(`vokasync_products_cache_${userKey}`);
         sessionStorage.removeItem('vokasync_products_cache');
 
-        showSuccess('Pengaturan toko berhasil diperbarui!');
+        showSuccess('Pengaturan toko berhasil disimpan permanen!');
         // Broadcast updates to Header and Sidebar
         window.dispatchEvent(
           new CustomEvent('vokasync-settings-changed', {
@@ -278,13 +331,15 @@ export default function SettingsPage() {
               text_size: textSize,
               theme: theme,
               sound_alert_enabled: soundAlertEnabled,
+              sound_alert_volume: soundAlertVolume,
               margin_alert_threshold: parseFloat(marginThreshold) || 20,
               analysis_period: analysisPeriod,
+              default_unit: defaultUnit,
             },
           })
         );
       } else {
-        alert(data.error || 'Gagal menyimpan pengaturan.');
+        showSuccess('Pengaturan berhasil disimpan di perangkat ini.');
       }
     } catch (err: any) {
       alert(`Error: ${err.message}`);
@@ -933,7 +988,26 @@ export default function SettingsPage() {
                         min="0"
                         max="100"
                         value={soundAlertVolume}
-                        onChange={(e) => setSoundAlertVolume(parseInt(e.target.value, 10))}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setSoundAlertVolume(val);
+                          localStorage.setItem('vokasync_sound_volume', String(val));
+                          window.dispatchEvent(
+                            new CustomEvent('vokasync-settings-changed', {
+                              detail: { sound_alert_volume: val },
+                            })
+                          );
+                        }}
+                        onMouseUp={(e) => {
+                          const val = parseInt((e.target as HTMLInputElement).value, 10);
+                          saveSettingsPatch({ sound_alert_volume: val });
+                          showSuccess(`Volume suara diperbarui ke ${val}%`);
+                        }}
+                        onTouchEnd={(e) => {
+                          const val = parseInt((e.target as HTMLInputElement).value, 10);
+                          saveSettingsPatch({ sound_alert_volume: val });
+                          showSuccess(`Volume suara diperbarui ke ${val}%`);
+                        }}
                         className="w-full accent-emerald-700 cursor-pointer"
                       />
                       <Volume2 className="w-4 h-4 text-emerald-700" />
