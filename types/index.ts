@@ -150,7 +150,7 @@ export interface ExperimentResult {
   created_at?: string;
 }
 
-export type ProductActionCategory = 'dorong' | 'pertahankan' | 'perbaiki' | 'kurangi';
+export type ProductActionCategory = 'dorong' | 'pertahankan' | 'perbaiki' | 'kurangi' | 'stok_baru';
 
 export type StockBatchStatus = 'active' | 'depleted';
 

@@ -318,6 +318,13 @@ export default function ProdukPage() {
           color: 'bg-amber-50 text-amber-900 border-amber-200',
           desc: `Margin tergerus di bawah target ${threshold}%. Perlu penyesuaian harga atau bundling produk.`,
         };
+      case 'stok_baru':
+        return {
+          label: 'Stok Baru',
+          icon: Package,
+          color: 'bg-sky-50 text-sky-800 border-sky-200',
+          desc: 'Barang baru masuk ke kios dan belum ada riwayat penjualan. Atur harga jual untuk melihat analisis keuntungan.',
+        };
       case 'kurangi':
       default:
         return {
@@ -550,7 +557,7 @@ export default function ProdukPage() {
     setEditProduct(p);
     setEditName(p.name);
     setEditUnit(p.unit);
-    setEditSelling(String(p.selling_price));
+    setEditSelling(p.selling_price && p.selling_price > 0 ? String(p.selling_price) : '');
     setEditStock(String(p.remaining_stock ?? 10));
     setEditImageUrl(p.image_url || null);
     setEditError('');
@@ -856,10 +863,11 @@ export default function ProdukPage() {
   const currentCacheKey = selectedProduct
     ? `${selectedProduct.id}-${selectedProduct.cost_price}-${selectedProduct.selling_price}`
     : '';
-  const selectedLiveMargin = selectedProduct && selectedProduct.cost_price && selectedProduct.selling_price && selectedProduct.selling_price > 0
-    ? Math.round(((selectedProduct.selling_price - selectedProduct.cost_price) / selectedProduct.selling_price) * 100)
-    : (selectedProduct?.margin_percentage || 0);
-  const selectedLiveCategory = determineActionCategory(selectedLiveMargin, threshold);
+  const hasSelectedPrices = Boolean(selectedProduct && selectedProduct.cost_price && selectedProduct.cost_price > 0 && selectedProduct.selling_price && selectedProduct.selling_price > 0);
+  const selectedLiveMargin = hasSelectedPrices
+    ? Math.round(((selectedProduct!.selling_price - selectedProduct!.cost_price) / selectedProduct!.selling_price) * 100)
+    : (selectedProduct?.selling_price && selectedProduct.selling_price > 0 ? (selectedProduct.margin_percentage || 0) : 0);
+  const selectedLiveCategory = determineActionCategory(selectedLiveMargin, threshold, Boolean(selectedProduct?.selling_price && selectedProduct.selling_price > 0));
   const currentAiNote = selectedProduct
     ? aiNotes[currentCacheKey] || getActionBadge(selectedLiveCategory).desc
     : '';
@@ -1499,10 +1507,15 @@ export default function ProdukPage() {
             </div>
           ) : (
             filteredProducts.map((p) => {
-              const liveMargin = (p.cost_price && p.selling_price && p.selling_price > 0)
+              const hasBothPrices = Boolean(p.cost_price && p.cost_price > 0 && p.selling_price && p.selling_price > 0);
+              const liveMargin = hasBothPrices
                 ? Math.round(((p.selling_price - p.cost_price) / p.selling_price) * 100)
-                : (p.margin_percentage || 0);
-              const dynamicCategory = determineActionCategory(liveMargin, threshold);
+                : (p.selling_price && p.selling_price > 0 ? (p.margin_percentage || 0) : null);
+              const dynamicCategory = determineActionCategory(
+                liveMargin || 0,
+                threshold,
+                Boolean(p.selling_price && p.selling_price > 0)
+              );
               const badge = getActionBadge(dynamicCategory);
               const BadgeIcon = badge.icon;
               const isSelected = selectedProduct?.id === p.id;
@@ -1538,7 +1551,7 @@ export default function ProdukPage() {
                               )}
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                              ~{p.avg_daily_volume || 1} {p.unit}/hari • 7 Hari: Rp{(p.total_revenue_7d || 0).toLocaleString('id-ID')}
+                              {p.avg_daily_volume && p.avg_daily_volume > 0 ? `~${p.avg_daily_volume} ${p.unit}/hari • ` : ''}7 Hari: Rp{(p.total_revenue_7d || 0).toLocaleString('id-ID')}
                             </p>
                           </div>
                         </div>
@@ -1573,7 +1586,7 @@ export default function ProdukPage() {
                       </div>
 
                       {/* Margin Bar */}
-                      {p.cost_price && p.cost_price > 0 ? (
+                      {p.cost_price && p.cost_price > 0 && p.selling_price && p.selling_price > 0 && liveMargin !== null ? (
                         <div className="space-y-1 my-2">
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-slate-500">Persentase Untung:</span>
@@ -1597,8 +1610,10 @@ export default function ProdukPage() {
                         </div>
                       ) : (
                         <div className="my-2 py-1 px-2 rounded-lg bg-slate-50 border border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
-                          <span>Harga Modal:</span>
-                          <span className="font-semibold text-slate-400 italic">Belum tersedia</span>
+                          <span>Estimasi Margin:</span>
+                          <span className="font-semibold text-slate-400 italic">
+                            {!p.cost_price || p.cost_price <= 0 ? 'Modal belum ada' : 'Harga jual belum diatur'}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -1615,7 +1630,11 @@ export default function ProdukPage() {
                       </div>
                       <div>
                         <span className="text-slate-400">Jual: </span>
-                        <span className="font-bold text-slate-900">Rp{(p.selling_price || 0).toLocaleString('id-ID')}</span>
+                        {p.selling_price && p.selling_price > 0 ? (
+                          <span className="font-bold text-slate-900">Rp{p.selling_price.toLocaleString('id-ID')}</span>
+                        ) : (
+                          <span className="font-medium text-slate-400 italic">Belum ada</span>
+                        )}
                         {p.unit.toLowerCase() === 'kg' && p.selling_price && p.selling_price > 0 && (
                           <span className="block text-[10px] text-emerald-700 font-bold tracking-tight">
                             (Rp{Math.round(p.selling_price / 10).toLocaleString('id-ID')}/ons)
@@ -1724,25 +1743,32 @@ export default function ProdukPage() {
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-slate-100">
                     <span className="text-slate-500">Harga Jual ke Pembeli:</span>
-                    <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
-                      Rp{(selectedProduct.selling_price || 0).toLocaleString('id-ID')} / {selectedProduct.unit}
-                    </span>
+                    {selectedProduct.selling_price && selectedProduct.selling_price > 0 ? (
+                      <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
+                        Rp{selectedProduct.selling_price.toLocaleString('id-ID')} / {selectedProduct.unit}
+                      </span>
+                    ) : (
+                      <span className="font-semibold text-slate-400 italic bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200/60">
+                        Belum diatur
+                      </span>
+                    )}
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-slate-100">
                     <span className="text-slate-500">Untung per Satuan:</span>
-                    {selectedProduct.cost_price && selectedProduct.cost_price > 0 && selectedProduct.selling_price > selectedProduct.cost_price ? (
+                    {selectedProduct.cost_price && selectedProduct.cost_price > 0 && selectedProduct.selling_price && selectedProduct.selling_price > 0 ? (
                       <span className="font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200/60">
+                        {selectedProduct.selling_price >= selectedProduct.cost_price ? '+' : ''}
                         Rp{(selectedProduct.selling_price - selectedProduct.cost_price).toLocaleString('id-ID')} / {selectedProduct.unit}
                       </span>
                     ) : (
                       <span className="font-semibold text-slate-400 italic">
-                        Data modal belum tersedia
+                        {!selectedProduct.cost_price ? 'Data modal belum tersedia' : 'Harga jual belum diatur'}
                       </span>
                     )}
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-slate-100">
                     <span className="text-slate-500">Persentase Untung:</span>
-                    {selectedProduct.cost_price && selectedProduct.cost_price > 0 && selectedProduct.selling_price > 0 ? (
+                    {selectedProduct.cost_price && selectedProduct.cost_price > 0 && selectedProduct.selling_price && selectedProduct.selling_price > 0 ? (
                       <span
                         className={`font-black px-2.5 py-0.5 rounded-md border ${selectedLiveMargin >= threshold
                           ? 'text-emerald-800 bg-emerald-100/70 border-emerald-200'
@@ -1760,7 +1786,7 @@ export default function ProdukPage() {
                   <div className="flex justify-between items-center py-2 border-b border-slate-100">
                     <span className="text-slate-500">Saran VokaSync:</span>
                     <span className="font-extrabold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-md uppercase border border-slate-200/70">
-                      {selectedProduct.cost_price && selectedProduct.cost_price > 0 ? getActionBadge(selectedLiveCategory).label : 'Lengkapi Modal'}
+                      {getActionBadge(selectedLiveCategory).label}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2">
@@ -1778,7 +1804,7 @@ export default function ProdukPage() {
                 </div>
 
                 {/* Kalkulator Eceran Pasar Tradisional (Konversi Ons & Pecahan) */}
-                {selectedProduct.unit.toLowerCase() === 'kg' && (
+                {selectedProduct.unit.toLowerCase() === 'kg' && selectedProduct.selling_price && selectedProduct.selling_price > 0 && (
                   <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-amber-950 font-bold text-xs">

@@ -73,7 +73,7 @@ export function StudioModal({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const safePrice = Number(activePrice) || 0;
-  const formattedPrice = `Rp${safePrice.toLocaleString('id-ID')}/${activeUnit || 'kg'}`;
+  const formattedPrice = safePrice > 0 ? `Rp${safePrice.toLocaleString('id-ID')}/${activeUnit || 'kg'}` : `Hubungi Kios`;
 
   const [promoText, setPromoText] = useState(
     `*PROMO SPESIAL ${effectiveStoreName.toUpperCase()}*\n\n` +

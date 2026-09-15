@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
       const cost = batchCost || stat.latestCost || 0;
       const selling = stat.latestSelling || 0;
       const margin = calculateMargin(cost, selling);
-      const category = determineActionCategory(margin, threshold);
+      const category = determineActionCategory(margin, threshold, selling > 0);
       let remainingStock = 0;
       let initialBatchQty = 0;
 

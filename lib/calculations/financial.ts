@@ -9,8 +9,10 @@ export function calculateMargin(costPrice: number, sellingPrice: number): number
 
 export function determineActionCategory(
   margin: number,
-  threshold: number = 20
+  threshold: number = 20,
+  hasSellingPrice: boolean = true
 ): ProductActionCategory {
+  if (!hasSellingPrice) return 'stok_baru';
   if (margin >= 35) return 'dorong';
   if (margin >= threshold) return 'pertahankan';
   if (margin >= 10) return 'perbaiki';

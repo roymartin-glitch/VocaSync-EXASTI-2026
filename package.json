@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "allowScripts": {
+    "protobufjs": true,
+    "unrs-resolver": true
+  },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
     "@supabase/ssr": "^0.12.6",
