@@ -1,0 +1,261 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #F4F6F4;
+    --foreground: #0F172A;
+    --card: #ffffff;
+    --card-foreground: #0F172A;
+    --primary: #00875A;
+    --primary-foreground: #ffffff;
+    --primary-light: #EAF7ED;
+    --primary-dark: #0A2619;
+    --accent-lime: #A3E635;
+    --muted: #475569;
+    --muted-light: #F1F5F9;
+    --border: #E2E8F0;
+  }
+
+  html {
+    font-size: 18px;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* =========================================================
+   ACCESSIBILITY: TEXT SIZE SETTINGS
+   ========================================================= */
+html.text-size-kecil {
+  font-size: 15px;
+}
+
+html.text-size-normal {
+  font-size: 18px;
+}
+
+html.text-size-besar {
+  font-size: 20px;
+}
+
+html.text-size-sangat-besar {
+  font-size: 22px;
+}
+
+/* =========================================================
+   THEME 1: GELAP (DARK MODE)
+   ========================================================= */
+html.theme-gelap {
+  color-scheme: dark;
+}
+
+html.theme-gelap body {
+  background-color: #0A140F !important;
+  color: #F1F5F9 !important;
+}
+
+/* Cards & containers in Dark Mode */
+html.theme-gelap .bg-white {
+  background-color: #12231A !important;
+  color: #F8FAFC !important;
+  border-color: #1B3829 !important;
+}
+
+html.theme-gelap .text-slate-900,
+html.theme-gelap .text-slate-800,
+html.theme-gelap .text-slate-950 {
+  color: #F8FAFC !important;
+}
+
+html.theme-gelap .text-slate-700,
+html.theme-gelap .text-slate-600 {
+  color: #CBD5E1 !important;
+}
+
+html.theme-gelap .text-slate-500,
+html.theme-gelap .text-slate-400 {
+  color: #94A3B8 !important;
+}
+
+html.theme-gelap .border-slate-200,
+html.theme-gelap .border-slate-100,
+html.theme-gelap .border-slate-300 {
+  border-color: #1E3D2C !important;
+}
+
+html.theme-gelap .bg-slate-50,
+html.theme-gelap .bg-slate-100 {
+  background-color: #0D1C14 !important;
+  color: #E2E8F0 !important;
+}
+
+html.theme-gelap input,
+html.theme-gelap select,
+html.theme-gelap textarea {
+  background-color: #0D1C14 !important;
+  color: #F8FAFC !important;
+  border-color: #1E3D2C !important;
+}
+
+/* Dark mode voice card */
+html.theme-gelap .bg-\[\#EAF7ED\] {
+  background-color: #0F271B !important;
+  border-color: #1D4A34 !important;
+}
+
+/* Dark mode warning card */
+html.theme-gelap .bg-\[\#FEF3E2\] {
+  background-color: #2D1E0C !important;
+  border-color: #593A14 !important;
+}
+html.theme-gelap .text-amber-950,
+html.theme-gelap .text-amber-900 {
+  color: #FDE68A !important;
+}
+
+/* =========================================================
+   THEME 2: 3D (TACTILE / SKEUOMORPHIC 3D EMBOSSED)
+   ========================================================= */
+html.theme-3d body {
+  background-color: #EBF0EB !important;
+}
+
+/* 3D Embossed White Cards */
+html.theme-3d .bg-white {
+  box-shadow: 0 8px 0 #CBD5E1, 0 12px 20px rgba(0, 0, 0, 0.08) !important;
+  border-bottom-width: 3px !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* 3D Primary Green Buttons & Cards */
+html.theme-3d .bg-\[\#00875A\],
+html.theme-3d button.bg-\[\#00875A\] {
+  box-shadow: 0 6px 0 #005A3C, 0 10px 18px rgba(0, 135, 90, 0.25) !important;
+  transform: translateY(-2px);
+  transition: all 0.1s ease !important;
+}
+
+html.theme-3d button.bg-\[\#00875A\]:active {
+  transform: translateY(4px) !important;
+  box-shadow: 0 1px 0 #005A3C, 0 4px 8px rgba(0, 135, 90, 0.2) !important;
+}
+
+/* 3D Lime Cards */
+html.theme-3d .bg-\[\#A3E635\] {
+  box-shadow: 0 8px 0 #65A30D, 0 12px 20px rgba(163, 230, 53, 0.25) !important;
+}
+
+/* 3D Stepper Buttons */
+html.theme-3d .rounded-full.bg-slate-100 {
+  box-shadow: 0 4px 0 #94A3B8, 0 6px 12px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-2px);
+}
+html.theme-3d .rounded-full.bg-slate-100:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 1px 0 #94A3B8 !important;
+}
+
+/* 3D Big Voice Mic Button */
+html.theme-3d .w-28.h-28,
+html.theme-3d .w-32.h-32 {
+  box-shadow: 0 10px 0 #005A3C, 0 16px 28px rgba(0, 135, 90, 0.35) !important;
+  transform: translateY(-3px);
+}
+html.theme-3d .w-28.h-28:active,
+html.theme-3d .w-32.h-32:active {
+  transform: translateY(6px) !important;
+  box-shadow: 0 2px 0 #005A3C !important;
+}
+
+/* =========================================================
+   PRINT STYLES (CLEAN EXCEL-STYLE FINANCIAL REPORT)
+   ========================================================= */
+@media print {
+  /* 1. Hide Sidebar, Navigation, and Action Buttons strictly */
+  aside,
+  nav,
+  header,
+  .no-print,
+  button,
+  a[href],
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  /* 2. Reset App Layout Margins for Printing */
+  body, html {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .md\:pl-20,
+  .lg\:pl-64 {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 10mm 15mm !important;
+    margin: 0 !important;
+  }
+
+  /* 3. Clean Excel Spreadsheet Styling */
+  .excel-print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 12px !important;
+    font-family: 'Segoe UI', Tahoma, Calibri, Arial, sans-serif !important;
+  }
+
+  .excel-print-table th,
+  .excel-print-table td {
+    border: 1px solid #94a3b8 !important;
+    padding: 6px 10px !important;
+    font-size: 10pt !important;
+  }
+
+  .excel-print-table th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    text-align: left !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .excel-print-table tr:nth-child(even) td {
+    background-color: #f8fafc !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
